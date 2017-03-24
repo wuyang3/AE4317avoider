@@ -1,0 +1,17 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="m_avoider">
+  <doc>
+    <description>Avoid several colors.</description>
+  </doc>
+  <depends>m_colorfilter.xml</depends>
+  <header>
+    <file name="m_avoider.h"/>
+  </header>
+  <init fun="m_avoider_init()"/>
+  <periodic fun="m_avoider_periodic()" freq="15"/>
+  <makefile>
+    <file name="m_avoider.c"/>
+  </makefile>
+</module>
+

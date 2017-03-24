@@ -1,13 +1,13 @@
 /*
- * Copyright (C) Roland Meertens
+ * Copyright (C) Wuyang
  *
  * This file is part of paparazzi
  *
  */
 /**
- * @file "modules/orange_avoider/orange_avoider.c"
- * @author Roland Meertens
- * Example on how to use the colours detected to avoid orange pole in the cyberzoo
+ * @file "modules/m_avoider/m_avoider.c"
+ * @author Wuyang
+ * Avoid several colors.
  */
 
 #include <time.h>
@@ -17,28 +17,29 @@
 #include "firmwares/rotorcraft/navigation.h"
 
 #include "generated/flight_plan.h"
-#include "modules/computer_vision/colorfilter.h"
-#include "modules/orange_avoider/orange_avoider.h"
+#include "modules/m_colorfilter/m_colorfilter.h"//NOTE TO CHANGE
+#include "modules/m_avoider/m_avoider.h"
 
-#define ORANGE_AVOIDER_VERBOSE TRUE
+#define M_AVOIDER_VERBOSE TRUE
 
-#define PRINT(string,...) fprintf(stderr, "[orange_avoider->%s()] " string,__FUNCTION__ , ##__VA_ARGS__)
-#if ORANGE_AVOIDER_VERBOSE
+#define PRINT(string,...) fprintf(stderr, "[m_avoider->%s()] " string,__FUNCTION__ , ##__VA_ARGS__)
+#if M_AVOIDER_VERBOSE
 #define VERBOSE_PRINT PRINT
 #else
 #define VERBOSE_PRINT(...)
 #endif
 
 uint8_t safeToGoForwards        = false;
-int tresholdColorCount          = 0.05 * 124800; // 520 x 240 = 124.800 total pixels
+uint8_t l =false;
+uint8_t m =false;
+uint8_t r =false;
+int tresholdColorCount          = 0.02 * 124800; // 520 x 240 = 124.800 total pixels. Originally 0.05 x total.
 float incrementForAvoidance;
 uint16_t trajectoryConfidence   = 1;
 float maxDistance               = 2.25;
 
-/*
- * Initialisation function, setting the colour filter, random seed and incrementForAvoidance
- */
-void orange_avoider_init()
+/*Initialisation function, setting the colour filter, random seed and incrementForAvoidance*/
+void m_avoider_init()
 {
   // Initialise the variables of the colorfilter to accept orange, red, etc.
   thres_o.y_m = 20;
@@ -61,24 +62,26 @@ void orange_avoider_init()
   thres_b.v_M = 130;
   // Initialise random values
   srand(time(NULL));
-  chooseRandomIncrementAvoidance();
+  chooseRandomIncrementAvoidance(l, m, r);
 }
 
 /*
  * Function that checks it is safe to move forwards, and then moves a waypoint forward or changes the heading
  */
-void orange_avoider_periodic()
+void m_avoider_periodic()
 {
-  // Check the amount of orange. If this is above a threshold
-  // you want to turn a certain amount of degrees
-  safeToGoForwards = color_count < tresholdColorCount;
-  VERBOSE_PRINT("Color_count: %d  threshold: %d safe: %d \n", color_count, tresholdColorCount, safeToGoForwards);
+  //check the amount of obstacle colors.
+  l = cnt.cnt_l  > tresholdColorCount;
+  m = cnt.cnt_m > tresholdColorCount;
+  r = cnt.cnt_r > tresholdColorCount;
+  safeToGoForwards = !(l || m || r);
+  VERBOSE_PRINT("Color_left: %d Color_middle: %d Color_right: %d  threshold: %d safe: %d \n", cnt.cnt_l, cnt.cnt_m, cnt.cnt_r, tresholdColorCount, safeToGoForwards);
   float moveDistance = fmin(maxDistance, 0.05 * trajectoryConfidence);
   if(safeToGoForwards){
       moveWaypointForward(WP_GOAL, moveDistance);
       moveWaypointForward(WP_TRAJECTORY, 1.25 * moveDistance);
       nav_set_heading_towards_waypoint(WP_GOAL);
-      chooseRandomIncrementAvoidance();
+      chooseRandomIncrementAvoidance(l, m, r);
       trajectoryConfidence += 1;
   }
   else{
@@ -105,7 +108,7 @@ uint8_t increase_nav_heading(int32_t *heading, float incrementDegrees)
   // Check if your turn made it go out of bounds...
   INT32_ANGLE_NORMALIZE(newHeading); // HEADING HAS INT32_ANGLE_FRAC....
   *heading = newHeading;
-  VERBOSE_PRINT("Increasing heading to %f\n", ANGLE_FLOAT_OF_BFP(*heading) * 180 / M_PI);
+  //VERBOSE_PRINT("Increasing heading to %f\n", ANGLE_FLOAT_OF_BFP(*heading) * 180 / M_PI);
   return false;
 }
 
@@ -122,7 +125,7 @@ uint8_t calculateForwards(struct EnuCoor_i *new_coor, float distanceMeters)
   // Now determine where to place the waypoint you want to go to
   new_coor->x                       = pos->x + POS_BFP_OF_REAL(sin_heading * (distanceMeters));
   new_coor->y                       = pos->y + POS_BFP_OF_REAL(cos_heading * (distanceMeters));
-  VERBOSE_PRINT("Calculated %f m forward position. x: %f  y: %f based on pos(%f, %f) and heading(%f)\n", distanceMeters, POS_FLOAT_OF_BFP(new_coor->x), POS_FLOAT_OF_BFP(new_coor->y), POS_FLOAT_OF_BFP(pos->x), POS_FLOAT_OF_BFP(pos->y), ANGLE_FLOAT_OF_BFP(eulerAngles->psi)*180/M_PI);
+  //VERBOSE_PRINT("Calculated %f m forward position. x: %f  y: %f based on pos(%f, %f) and heading(%f)\n", distanceMeters, POS_FLOAT_OF_BFP(new_coor->x), POS_FLOAT_OF_BFP(new_coor->y), POS_FLOAT_OF_BFP(pos->x), POS_FLOAT_OF_BFP(pos->y), ANGLE_FLOAT_OF_BFP(eulerAngles->psi)*180/M_PI);
   return false;
 }
 
@@ -131,7 +134,7 @@ uint8_t calculateForwards(struct EnuCoor_i *new_coor, float distanceMeters)
  */
 uint8_t moveWaypoint(uint8_t waypoint, struct EnuCoor_i *new_coor)
 {
-  VERBOSE_PRINT("Moving waypoint %d to x:%f y:%f\n", waypoint, POS_FLOAT_OF_BFP(new_coor->x), POS_FLOAT_OF_BFP(new_coor->y));
+  //VERBOSE_PRINT("Moving waypoint %d to x:%f y:%f\n", waypoint, POS_FLOAT_OF_BFP(new_coor->x), POS_FLOAT_OF_BFP(new_coor->y));
   waypoint_set_xy_i(waypoint, new_coor->x, new_coor->y);
   return false;
 }
@@ -150,16 +153,39 @@ uint8_t moveWaypointForward(uint8_t waypoint, float distanceMeters)
 /*
  * Sets the variable 'incrementForAvoidance' randomly positive/negative
  */
-uint8_t chooseRandomIncrementAvoidance()
+uint8_t chooseRandomIncrementAvoidance(uint8_t left,uint8_t middle, uint8_t right)
 {
-  // Randomly choose CW or CCW avoiding direction
-  int r = rand() % 2;
-  if (r == 0) {
-    incrementForAvoidance = 10.0;
-    VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
-  } else {
-    incrementForAvoidance = -10.0;
-    VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+  if (left) {
+	if (middle) {
+		incrementForAvoidance = 10.0;
+		//VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+	}else {
+	  if (right) {
+	    incrementForAvoidance = 0.0;
+	    //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+	  }else {
+	    incrementForAvoidance = 5.0;
+	    //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+	  }
+	}
+  }else {
+    if (middle) {
+      if (right){
+        incrementForAvoidance = -10.0;
+    	//VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+      }else {
+    	  incrementForAvoidance = 5.0;
+    	  //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+      }
+    }else {
+      if (right) {
+        incrementForAvoidance = -5.0;
+        //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+      }else {
+        incrementForAvoidance = 0.0;
+    	//VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+      }
+    }
   }
   return false;
 }

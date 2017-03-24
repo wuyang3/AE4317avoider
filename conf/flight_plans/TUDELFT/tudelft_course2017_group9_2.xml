@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="4.0" ground_alt="3.0" lat0="51.9906224" lon0="4.3767678" max_dist_from_home="8" name="Bebop avoid orange TU Delft Cyberzoo" security_height="0.4">
+<flight_plan alt="1.0" ground_alt="0" lat0="51.9906224" lon0="4.3767678" max_dist_from_home="8" name="Bebop avoid orange TU Delft Cyberzoo" security_height="0.4">
   <header>
     #include "subsystems/datalink/datalink.h"
     #include "subsystems/electrical.h"
@@ -14,6 +14,7 @@
     <waypoint name="TD" x="0.8" y="-1.7"/>
     <waypoint name="GOAL" x="1.9" y="1.0"/>
     <waypoint name="TRAJECTORY" x="1.9" y="1.0"/>
+    <waypoint name="CORNER" x="2.5"  y="4.5"/>
     <waypoint lat="51.9905836" lon="4.3767729" name="_CZ1"/>
     <waypoint lat="51.9906365" lon="4.3767138" name="_CZ2"/>
     <waypoint lat="51.990680" lon="4.376805" name="_CZ3"/>
@@ -100,15 +101,20 @@
       <call_once fun="NavSetWaypointHere(WP_STDBY)"/>
       <stay wp="STDBY"/>
     </block>
+    <block name="Corner">
+      <go from="STDBY" wp="CORNER" hmode="route"/>
+      <stay wp="CORNER"/>
+      <exception cond="LessThan(5, block_time)" deroute="START"/>
+    </block>
     <block key="g" name="START" strip_button="Go" strip_icon="lookfore.png">
       <call_once fun="NavSetWaypointHere(WP_GOAL)"/>
       <set var="trajectoryConfidence" value="1"/>
     </block>
     <block name="StayGoal">
       <stay wp="GOAL"/>
-      <exception cond="!InsideObstacleZone(WaypointX(WP_TRAJECTORY),WaypointY(WP_TRAJECTORY))" deroute="PrepareObstacleRun"/>
+      <exception cond="!InsideObstacleZone(WaypointX(WP_TRAJECTORY),WaypointY(WP_TRAJECTORY))" deroute="HeadingObstacleZone"/>
     </block>
-    <block name="PrepareObstacleRun">
+    <block name="HeadingObstacleZone">
       <while cond="!InsideObstacleZone(WaypointX(WP_TRAJECTORY),WaypointY(WP_TRAJECTORY))">
         <call_once fun="increase_nav_heading(&nav_heading, 5)"/>
       </while>

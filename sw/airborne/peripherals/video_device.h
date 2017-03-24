@@ -28,7 +28,7 @@
 
 #include <stdbool.h>
 #include <inttypes.h>
-#include "modules/computer_vision/lib/vision/image.h"
+#include "modules/computer_vision/lib/vision/m_image.h" //NOTE TO CHANGE WHEN USE DIFFERENT MODULE!
 
 /* Different video filters */
 #define VIDEO_FILTER_DEBAYER  (0x1 << 0)  ///<Enable software debayer

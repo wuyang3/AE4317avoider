@@ -40,25 +40,13 @@ float maxDistance               = 2.25;
  */
 void orange_avoider_init()
 {
-  // Initialise the variables of the colorfilter to accept orange, red, etc.
-  thres_o.y_m = 20;
-  thres_o.y_M = 255;
-  thres_o.u_m = 75;
-  thres_o.u_M = 145;
-  thres_o.v_m = 167;
-  thres_o.v_M = 255;
-  thres_r.y_m = 26;
-  thres_r.y_M = 42;
-  thres_r.u_m = 122;
-  thres_r.u_M = 134;
-  thres_r.v_m = 150;
-  thres_r.v_M = 202;
-  thres_b.y_m = 0;
-  thres_b.y_M = 18;
-  thres_b.u_m = 120;
-  thres_b.u_M = 130;
-  thres_b.v_m = 120;
-  thres_b.v_M = 130;
+  // Initialise the variables of the colorfilter to accept orange
+  color_lum_min = 20;
+  color_lum_max = 255;
+  color_cb_min  = 75;
+  color_cb_max  = 145;
+  color_cr_min  = 167;
+  color_cr_max  = 255;
   // Initialise random values
   srand(time(NULL));
   chooseRandomIncrementAvoidance();

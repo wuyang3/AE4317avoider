@@ -51,12 +51,13 @@
 			<define name="CV_AE_AWB_AV" value="1" />
 			<define name="CV_AE_AWB_VERBOSE" value="0" />
 		</module>
-		<module name="cv_colorfilter">
+		<module name="m_colorfilter">
 			<define name="COLORFILTER_CAMERA" value="front_camera" />
 		</module>
-		<module name="orange_avoider" />
+		<module name="m_avoider" />
+		<!-- module name="test_module_2" / -->
 		<module name="video_rtp_stream">
-			<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
+			<configure name="VIEWVIDEO_HOST" value="192.168.42.69" />
 			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 			<define name="VIEWVIDEO_CAMERA" value="front_camera" />
 			<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />

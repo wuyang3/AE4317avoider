@@ -146,7 +146,8 @@ void image_to_grayscale(struct image_t *input, struct image_t *output)
  * @param[in] v_M The V maximum value
  * @return The amount of filtered pixels
  */
-uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, struct thres thres_o, struct thres thres_r, struct thres thres_b)
+uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, uint8_t y_m, uint8_t y_M, uint8_t u_m,
+                                uint8_t u_M, uint8_t v_m, uint8_t v_M)
 {
   uint16_t cnt = 0;
   uint8_t *source = input->buf;
@@ -160,48 +161,20 @@ uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, s
     for (uint16_t x = 0; x < output->w; x += 2) {
       // Check if the color is inside the specified values
       if (
-        (dest[1] >= thres_o.y_m)
-        && (dest[1] <= thres_o.y_M)
-        && (dest[0] >= thres_o.u_m)
-        && (dest[0] <= thres_o.u_M)
-        && (dest[2] >= thres_o.v_m)
-        && (dest[2] <= thres_o.v_M)
-      ){
+        (dest[1] >= y_m)
+        && (dest[1] <= y_M)
+        && (dest[0] >= u_m)
+        && (dest[0] <= u_M)
+        && (dest[2] >= v_m)
+        && (dest[2] <= v_M)
+      ) {
         cnt ++;
         // UYVY
         dest[0] = 64;        // U
         dest[1] = source[1];  // Y
         dest[2] = 255;        // V
         dest[3] = source[3];  // Y
-      }else if(
-        (dest[1] >= thres_r.y_m)
-    	&& (dest[1] <= thres_r.y_M)
-    	&& (dest[0] >= thres_r.u_m)
-    	&& (dest[0] <= thres_r.u_M)
-    	&& (dest[2] >= thres_r.v_m)
-    	&& (dest[2] <= thres_r.v_M)
-      ){
-        cnt ++;
-        // UYVY
-        dest[0] = 43;        // U
-        dest[1] = source[1];  // Y
-        dest[2] = 21;        // V
-        dest[3] = source[3];  // Y
-      }else if(
-        (dest[1] >= thres_b.y_m)
-		&&(dest[1] <= thres_b.y_M)
-		&&(dest[0] >= thres_b.u_m)
-		&&(dest[0] <= thres_b.u_M)
-		&&(dest[2] >= thres_b.v_m)
-		&&(dest[2] >= thres_b.v_M)
-      ){
-        cnt ++;
-        dest[0] = source[0];
-        dest[1] = 255;
-        dest[2]=source[0];
-        dest[3] = 255;
-      }
-      else {
+      } else {
         // UYVY
         char u = source[0] - 127;
         u /= 4;
@@ -211,7 +184,7 @@ uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, s
         u /= 4;
         dest[2] = 127;        // V
         dest[3] = source[3];  // Y
-      }//else if will only be executed if all previous blocks' conditions are false.
+      }
 
       // Go to the next 2 pixels
       dest += 4;

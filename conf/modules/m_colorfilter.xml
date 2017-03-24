@@ -1,9 +1,9 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ColorFilter" dir="computer_vision">
+<module name="m_colorfilter">
   <doc>
-    <description>ColorFilter</description>
-    <define name="COLORFILTER_CAMERA" value="front_camera|bottom_camera" description="Video device to use"/>
+    <description>Filter multiple color and count the obstacle pixels in each sides.</description>
+     <define name="COLORFILTER_CAMERA" value="front_camera|bottom_camera" description="Video device to use"/>
   </doc>
   <settings>
     <dl_settings>
@@ -31,14 +31,12 @@
     </dl_settings>
   </settings>
   <depends>video_thread</depends>
-
   <header>
-    <file name="colorfilter.h"/>
+    <file name="m_colorfilter.h"/>
   </header>
-
   <init fun="colorfilter_init()"/>
-  <makefile target="ap">
-    <file name="colorfilter.c"/>
+  <makefile>
+    <file name="m_colorfilter.c"/>
   </makefile>
 </module>
 
