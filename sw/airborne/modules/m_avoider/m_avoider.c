@@ -33,7 +33,7 @@ uint8_t safeToGoForwards        = false;
 uint8_t l =false;
 uint8_t m =false;
 uint8_t r =false;
-int tresholdColorCount          = 0.02 * 124800; // 520 x 240 = 124.800 total pixels. Originally 0.05 x total.
+int tresholdColorCount          = 0.03 * 124800; // 520 x 240 = 124.800 total pixels. Originally 0.05 x total.
 float incrementForAvoidance;
 uint16_t trajectoryConfidence   = 1;
 float maxDistance               = 2.25;
@@ -48,12 +48,12 @@ void m_avoider_init()
   thres_o.u_M = 145;
   thres_o.v_m = 167;
   thres_o.v_M = 255;
-  thres_r.y_m = 26;
-  thres_r.y_M = 42;
-  thres_r.u_m = 122;
-  thres_r.u_M = 134;
-  thres_r.v_m = 150;
-  thres_r.v_M = 202;
+  thres_r.y_m = 0;  //26
+  thres_r.y_M = 30;  //42
+  thres_r.u_m = 110; //122
+  thres_r.u_M = 135; //134
+  thres_r.v_m = 140; //150
+  thres_r.v_M = 200; //202
   thres_b.y_m = 0;
   thres_b.y_M = 18;
   thres_b.u_m = 120;
@@ -70,30 +70,33 @@ void m_avoider_init()
  */
 void m_avoider_periodic()
 {
-  //check the amount of obstacle colors.
+  //check the amount of obstacle colors. O.O5 can be changed to specific waypoint moving rate.
   l = cnt.cnt_l  > tresholdColorCount;
   m = cnt.cnt_m > tresholdColorCount;
   r = cnt.cnt_r > tresholdColorCount;
-  safeToGoForwards = !(l || m || r);
-  VERBOSE_PRINT("Color_left: %d Color_middle: %d Color_right: %d  threshold: %d safe: %d \n", cnt.cnt_l, cnt.cnt_m, cnt.cnt_r, tresholdColorCount, safeToGoForwards);
+  safeToGoForwards = (!(l || m || r)) || (l && (!m) && r);
+  VERBOSE_PRINT("Color_left: %d Color_middle: %d Color_right: %d \n", cnt.cnt_l, cnt.cnt_m, cnt.cnt_r);
+  VERBOSE_PRINT("Unsafe left: %d Unsafe middle: %d Unsafe right: %d Safe: %d \n",l,m,r,safeToGoForwards);
+  chooseRandomIncrementAvoidance(l, m, r);
   float moveDistance = fmin(maxDistance, 0.05 * trajectoryConfidence);
-  if(safeToGoForwards){
-      moveWaypointForward(WP_GOAL, moveDistance);
-      moveWaypointForward(WP_TRAJECTORY, 1.25 * moveDistance);
-      nav_set_heading_towards_waypoint(WP_GOAL);
-      chooseRandomIncrementAvoidance(l, m, r);
-      trajectoryConfidence += 1;
+  if(safeToGoForwards) {
+	moveWaypointForward(WP_GOAL, moveDistance);
+	moveWaypointForward(WP_TRAJECTORY, 1.25 * moveDistance);
+	nav_set_heading_towards_waypoint(WP_GOAL);
+	trajectoryConfidence += 1;
   }
-  else{
-      waypoint_set_here_2d(WP_GOAL);
-      waypoint_set_here_2d(WP_TRAJECTORY);
-      increase_nav_heading(&nav_heading, incrementForAvoidance);
-      if(trajectoryConfidence > 5){
-          trajectoryConfidence -= 4;
-      }
-      else{
-          trajectoryConfidence = 1;
-      }
+  else if ((!safeToGoForwards) && (InObstacleZone(WaypointX(WP_TRAJECTORY),WaypointY(WP_TRAJECTORY)))) {
+	waypoint_set_here_2d(WP_GOAL);
+	waypoint_set_here_2d(WP_TRAJECTORY);
+	increase_nav_heading(&nav_heading, incrementForAvoidance);
+	if(trajectoryConfidence > 5){
+	  trajectoryConfidence -= 4;
+	}
+	else{
+	  trajectoryConfidence = 1;
+	}
+  }
+  else {
   }
   return;
 }
@@ -157,33 +160,33 @@ uint8_t chooseRandomIncrementAvoidance(uint8_t left,uint8_t middle, uint8_t righ
 {
   if (left) {
 	if (middle) {
-		incrementForAvoidance = 10.0;
-		//VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+		incrementForAvoidance = 15.0; //110 & 111
+		VERBOSE_PRINT("Set avoidance increment to: %f\n\n", incrementForAvoidance);
 	}else {
 	  if (right) {
-	    incrementForAvoidance = 0.0;
-	    //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+	    incrementForAvoidance = 1.0; // 101
+	    VERBOSE_PRINT("Set avoidance increment to: %f\n\n", incrementForAvoidance);
 	  }else {
-	    incrementForAvoidance = 5.0;
-	    //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+	    incrementForAvoidance = 10.0; // 100
+	    VERBOSE_PRINT("Set avoidance increment to: %f\n\n", incrementForAvoidance);
 	  }
 	}
   }else {
     if (middle) {
       if (right){
-        incrementForAvoidance = -10.0;
-    	//VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+        incrementForAvoidance = -15.0; //011
+    	VERBOSE_PRINT("Set avoidance increment to: %f\n\n", incrementForAvoidance);
       }else {
-    	  incrementForAvoidance = 5.0;
-    	  //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+        incrementForAvoidance = 10.0; //010
+    	VERBOSE_PRINT("Set avoidance increment to: %f\n\n", incrementForAvoidance);
       }
     }else {
       if (right) {
-        incrementForAvoidance = -5.0;
-        //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+        incrementForAvoidance = -10.0; //001
+        VERBOSE_PRINT("Set avoidance increment to: %f\n\n", incrementForAvoidance);
       }else {
-        incrementForAvoidance = 0.0;
-    	//VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+        incrementForAvoidance = 0.0; //000
+    	VERBOSE_PRINT("Set avoidance increment to: %f\n\n", incrementForAvoidance);
       }
     }
   }

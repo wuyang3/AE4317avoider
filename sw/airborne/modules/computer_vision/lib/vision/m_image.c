@@ -217,7 +217,7 @@ void image_yuv422_colorfilt(struct image_t *input, struct image_t *output, struc
       dest += 4;
       source += 4;
     }
-    for (uint16_t  x = output->w/3*1; x < output->w/3*2 ; x += 2) {
+    for (uint16_t x = output->w/3*1; x < output->w/3*2 ; x += 2) {
       // Check if the color is inside the specified values for the middle
       if (
         (dest[1] >= thres_o.y_m)
@@ -273,7 +273,7 @@ void image_yuv422_colorfilt(struct image_t *input, struct image_t *output, struc
       dest += 4;
       source += 4;
     }
-    for (uint16_t  x = output->w/3*2; x < output->w ; x += 2) {
+    for (uint16_t x = output->w/3*2; x < output->w ; x += 2) {
       // Check if the color is inside the specified values for the right
       if (
         (dest[1] >= thres_o.y_m)
