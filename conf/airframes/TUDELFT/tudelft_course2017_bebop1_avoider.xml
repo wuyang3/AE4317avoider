@@ -51,21 +51,28 @@
 			<define name="CV_AE_AWB_AV" value="1" />
 			<define name="CV_AE_AWB_VERBOSE" value="0" />
 		</module>
-		<module name="m_colorfilter">
-			<define name="COLORFILTER_CAMERA" value="front_camera" />
+		<!-- 
+		<module name="cv_opencvdemo">
+			<define name="OPENCVDEMO_CAMERA" value="bottom_camera" />
 		</module>
-		<module name="m_avoider" />
-		<!-- module name="test_module_2" / -->
+		-->
+		<module name="cv_opencv_aruco">
+			<define name="ARUCO_CAMERA" value="front_camera" />
+		</module>
 		<module name="video_rtp_stream">
 			<configure name="VIEWVIDEO_HOST" value="192.168.42.69" />
 			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 			<define name="VIEWVIDEO_CAMERA" value="front_camera" />
 			<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
 			<define name="VIEWVIDEO_FPS" value="18" />
-			<define name="VIEWVIDEO_WRITE_VIDEO" value="FALSE" />
+			<define name="VIEWVIDEO_WRITE_VIDEO" value="TRUE" />
 			<define name="VIEWVIDEO_VIDEO_FILE" value="orangeAvoider" />
 			<define name="VIEWVIDEO_STREAM_VIDEO" value="TRUE" />
 		</module>
+		<module name="cv_colorfilter">
+			<define name="COLORFILTER_CAMERA" value="front_camera" />
+		</module>
+		<module name="orange_avoider" />
 	</modules>
 
 	<commands>

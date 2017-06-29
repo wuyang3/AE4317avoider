@@ -31,10 +31,13 @@
 
 struct video_listener *listener = NULL;
 
-// Filter Setting.
-struct thres thres_o = {105, 205, 52, 140, 180, 255};
-struct thres thres_r = {4, 91, 0, 124, 127, 255};
-struct thres thres_b = {0, 18, 120, 130, 120, 130};
+// Filter Settings
+uint8_t color_lum_min = 105;
+uint8_t color_lum_max = 205;
+uint8_t color_cb_min  = 52;
+uint8_t color_cb_max  = 140;
+uint8_t color_cr_min  = 180;
+uint8_t color_cr_max  = 255;
 
 // Result
 int color_count = 0;
@@ -44,7 +47,11 @@ struct image_t *colorfilter_func(struct image_t *img);
 struct image_t *colorfilter_func(struct image_t *img)
 {
   // Filter
-  color_count = image_yuv422_colorfilt(img, img, thres_o, thres_r, thres_b);
+  color_count = image_yuv422_colorfilt(img, img,
+                                       color_lum_min, color_lum_max,
+                                       color_cb_min, color_cb_max,
+                                       color_cr_min, color_cr_max
+                                      );
 
   return img; // Colorfilter did not make a new image. Check if the img is changed or not?
 }

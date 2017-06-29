@@ -5,31 +5,21 @@
     <description>ColorFilter</description>
     <define name="COLORFILTER_CAMERA" value="front_camera|bottom_camera" description="Video device to use"/>
   </doc>
+
   <settings>
     <dl_settings>
       <dl_settings NAME="ColorFilter">
          <dl_setting var="listener->active" min="0" step="1" max="1" shortname="active" />
-         <dl_setting var="thres_o.y_m" min="0" step="1" max="255" shortname="o_y_min" />
-         <dl_setting var="thres_o.y_M" min="0" step="1" max="255" shortname="o_y_max" />
-         <dl_setting var="thres_o.u_m"  min="0" step="1" max="255" shortname="o_u_min" />
-         <dl_setting var="thres_o.u_M"  min="0" step="1" max="255" shortname="o_u_max" />
-         <dl_setting var="thres_o.v_m"  min="0" step="1" max="255" shortname="o_v_min" />
-         <dl_setting var="thres_o.v_M"  min="0" step="1" max="255" shortname="o_v_max" />
-         <dl_setting var="thres_r.y_m" min="0" step="1" max="255" shortname="r_y_min" />
-         <dl_setting var="thres_r.y_M" min="0" step="1" max="255" shortname="r_y_max" />
-         <dl_setting var="thres_r.u_m"  min="0" step="1" max="255" shortname="r_u_min" />
-         <dl_setting var="thres_r.u_M"  min="0" step="1" max="255" shortname="r_u_max" />
-         <dl_setting var="thres_r.v_m"  min="0" step="1" max="255" shortname="r_v_min" />
-         <dl_setting var="thres_r.v_M"  min="0" step="1" max="255" shortname="r_v_max" />
-         <dl_setting var="thres_b.y_m" min="0" step="1" max="255" shortname="b_y_min" />
-         <dl_setting var="thres_b.y_M" min="0" step="1" max="255" shortname="b_y_max" />
-         <dl_setting var="thres_b.u_m"  min="0" step="1" max="255" shortname="b_u_min" />
-         <dl_setting var="thres_b.u_M"  min="0" step="1" max="255" shortname="b_u_max" />
-         <dl_setting var="thres_b.v_m"  min="0" step="1" max="255" shortname="b_v_min" />
-         <dl_setting var="thres_b.v_M"  min="0" step="1" max="255" shortname="b_v_max" />
+         <dl_setting var="color_lum_min" min="0" step="1" max="255" shortname="y_min" />
+         <dl_setting var="color_lum_max" min="0" step="1" max="255" shortname="y_max" />
+         <dl_setting var="color_cb_min"  min="0" step="1" max="255" shortname="u_min" />
+         <dl_setting var="color_cb_max"  min="0" step="1" max="255" shortname="u_max" />
+         <dl_setting var="color_cr_min"  min="0" step="1" max="255" shortname="v_min" />
+         <dl_setting var="color_cr_max"  min="0" step="1" max="255" shortname="v_max" />
       </dl_settings>
     </dl_settings>
   </settings>
+
   <depends>video_thread</depends>
 
   <header>

@@ -146,12 +146,10 @@ void image_to_grayscale(struct image_t *input, struct image_t *output)
  * @param[in] v_M The V maximum value
  * @return The amount of filtered pixels
  */
-void image_yuv422_colorfilt(struct image_t *input, struct image_t *output,
-							struct thres thres_o, struct thres thres_r, struct thres thres_b, struct count *cnt)
+uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, uint8_t y_m, uint8_t y_M, uint8_t u_m,
+                                uint8_t u_M, uint8_t v_m, uint8_t v_M)
 {
-  uint16_t l = 0;
-  uint16_t m = 0;
-  uint16_t r = 0;
+  uint16_t cnt = 0;
   uint8_t *source = input->buf;
   uint8_t *dest = output->buf;
 
@@ -159,52 +157,24 @@ void image_yuv422_colorfilt(struct image_t *input, struct image_t *output,
   output->ts = input->ts;
 
   // Go trough all the pixels
-  for (uint16_t y = 0; y < (output->h/3*1); y++) {
+  for (uint16_t y = 0; y < output->h; y++) {
     for (uint16_t x = 0; x < output->w; x += 2) {
       // Check if the color is inside the specified values
       if (
-        (dest[1] >= thres_o.y_m)
-        && (dest[1] <= thres_o.y_M)
-        && (dest[0] >= thres_o.u_m)
-        && (dest[0] <= thres_o.u_M)
-        && (dest[2] >= thres_o.v_m)
-        && (dest[2] <= thres_o.v_M)
-      ){
-        l ++;
+        (dest[1] >= y_m)
+        && (dest[1] <= y_M)
+        && (dest[0] >= u_m)
+        && (dest[0] <= u_M)
+        && (dest[2] >= v_m)
+        && (dest[2] <= v_M)
+      ) {
+        cnt ++;
         // UYVY
         dest[0] = 64;        // U
         dest[1] = source[1];  // Y
         dest[2] = 255;        // V
         dest[3] = source[3];  // Y
-      }else if(
-        (dest[1] >= thres_r.y_m)
-    	&& (dest[1] <= thres_r.y_M)
-    	&& (dest[0] >= thres_r.u_m)
-    	&& (dest[0] <= thres_r.u_M)
-    	&& (dest[2] >= thres_r.v_m)
-    	&& (dest[2] <= thres_r.v_M)
-      ){
-        l ++;
-        // UYVY
-        dest[0] = 43;        // U
-        dest[1] = source[1];  // Y
-        dest[2] = 21;        // V
-        dest[3] = source[3];  // Y
-      }else if(
-        (dest[1] >= thres_b.y_m)
-		&&(dest[1] <= thres_b.y_M)
-		&&(dest[0] >= thres_b.u_m)
-		&&(dest[0] <= thres_b.u_M)
-		&&(dest[2] >= thres_b.v_m)
-		&&(dest[2] >= thres_b.v_M)
-      ){
-        l ++;
-        dest[0] = source[0]; //U
-        dest[1] = 255;       //Y
-        dest[2]= source[2];  //V
-        dest[3] = 255;       //Y
-      }
-      else {
+      } else {
         // UYVY
         char u = source[0] - 127;
         u /= 4;
@@ -214,137 +184,14 @@ void image_yuv422_colorfilt(struct image_t *input, struct image_t *output,
         u /= 4;
         dest[2] = 127;        // V
         dest[3] = source[3];  // Y
-      }//else if will only be executed if all previous blocks' conditions are false.
-      // Go to the next 2 pixels
-      dest += 4;
-      source += 4;
-    }
-  }
-  for (uint16_t y = (output->h/3*1); y < (output->h/3*2); y++) {
-    for (uint16_t x = 0; x < output->w; x += 2) {
-      // Check if the color is inside the specified values
-      if (
-        (dest[1] >= thres_o.y_m)
-        && (dest[1] <= thres_o.y_M)
-        && (dest[0] >= thres_o.u_m)
-        && (dest[0] <= thres_o.u_M)
-        && (dest[2] >= thres_o.v_m)
-        && (dest[2] <= thres_o.v_M)
-      ){
-        m ++;
-        // UYVY
-        dest[0] = 64;        // U
-        dest[1] = source[1];  // Y
-        dest[2] = 255;        // V
-        dest[3] = source[3];  // Y
-      }else if(
-        (dest[1] >= thres_r.y_m)
-    	&& (dest[1] <= thres_r.y_M)
-    	&& (dest[0] >= thres_r.u_m)
-    	&& (dest[0] <= thres_r.u_M)
-    	&& (dest[2] >= thres_r.v_m)
-    	&& (dest[2] <= thres_r.v_M)
-      ){
-        m ++;
-        // UYVY
-        dest[0] = 43;        // U
-        dest[1] = source[1];  // Y
-        dest[2] = 21;        // V
-        dest[3] = source[3];  // Y
-      }else if(
-        (dest[1] >= thres_b.y_m)
-		&&(dest[1] <= thres_b.y_M)
-		&&(dest[0] >= thres_b.u_m)
-		&&(dest[0] <= thres_b.u_M)
-		&&(dest[2] >= thres_b.v_m)
-		&&(dest[2] >= thres_b.v_M)
-      ){
-        m ++;
-        dest[0] = source[0]; //U
-        dest[1] = 255;       //Y
-        dest[2]= source[2];  //V
-        dest[3] = 255;       //Y
       }
-      else {
-        // UYVY
-        char u = source[0] - 127;
-        u /= 4;
-        dest[0] = 127;        // U
-        dest[1] = source[1];  // Y
-        u = source[2] - 127;
-        u /= 4;
-        dest[2] = 127;        // V
-        dest[3] = source[3];  // Y
-      }//else if will only be executed if all previous blocks' conditions are false.
+
       // Go to the next 2 pixels
       dest += 4;
       source += 4;
     }
   }
-  for (uint16_t y = (output->h/3*2); y < output->h; y++) {
-    for (uint16_t x = 0; x < output->w; x += 2) {
-      // Check if the color is inside the specified values
-      if (
-        (dest[1] >= thres_o.y_m)
-        && (dest[1] <= thres_o.y_M)
-        && (dest[0] >= thres_o.u_m)
-        && (dest[0] <= thres_o.u_M)
-        && (dest[2] >= thres_o.v_m)
-        && (dest[2] <= thres_o.v_M)
-      ){
-        r ++;
-        // UYVY
-        dest[0] = 64;        // U
-        dest[1] = source[1];  // Y
-        dest[2] = 255;        // V
-        dest[3] = source[3];  // Y
-      }else if(
-        (dest[1] >= thres_r.y_m)
-    	&& (dest[1] <= thres_r.y_M)
-    	&& (dest[0] >= thres_r.u_m)
-    	&& (dest[0] <= thres_r.u_M)
-    	&& (dest[2] >= thres_r.v_m)
-    	&& (dest[2] <= thres_r.v_M)
-      ){
-        r ++;
-        // UYVY
-        dest[0] = 43;        // U
-        dest[1] = source[1];  // Y
-        dest[2] = 21;        // V
-        dest[3] = source[3];  // Y
-      }else if(
-        (dest[1] >= thres_b.y_m)
-		&&(dest[1] <= thres_b.y_M)
-		&&(dest[0] >= thres_b.u_m)
-		&&(dest[0] <= thres_b.u_M)
-		&&(dest[2] >= thres_b.v_m)
-		&&(dest[2] >= thres_b.v_M)
-      ){
-        r ++;
-        dest[0] = source[0];
-        dest[1] = 255;
-        dest[2]= source[2];
-        dest[3] = 255;
-      }
-      else {
-        // UYVY
-        char u = source[0] - 127;
-        u /= 4;
-        dest[0] = 127;        // U
-        dest[1] = source[1];  // Y
-        u = source[2] - 127;
-        u /= 4;
-        dest[2] = 127;        // V
-        dest[3] = source[3];  // Y
-      }//else if will only be executed if all previous blocks' conditions are false.
-      // Go to the next 2 pixels
-      dest += 4;
-      source += 4;
-    }
-  }
-  cnt->cnt_l = l;
-  cnt->cnt_m = m;
-  cnt->cnt_r = r;
+  return cnt;
 }
 
 /**

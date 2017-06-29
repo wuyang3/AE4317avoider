@@ -32,9 +32,14 @@
 // Module functions
 extern void colorfilter_init(void);
 
-extern struct thres thres_o;
-extern struct thres thres_r;
-extern struct thres thres_b;
+extern uint8_t color_lum_min;
+extern uint8_t color_lum_max;
+
+extern uint8_t color_cb_min;
+extern uint8_t color_cb_max;
+
+extern uint8_t color_cr_min;
+extern uint8_t color_cr_max;
 
 extern int color_count;
 

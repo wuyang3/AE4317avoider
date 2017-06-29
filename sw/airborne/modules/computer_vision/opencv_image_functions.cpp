@@ -34,6 +34,30 @@ using namespace std;
 #include <opencv2/video/video.hpp>
 using namespace cv;
 
+void yuv_opencv_to_yuv422(Mat image, char *img, int y, int x)
+{
+//Turn the opencv RGB colored image back in a YUV colored image for the drone
+  for (int row = 0; row < x; row++) {
+    for (int col = 0; col < y; col++) {
+      // Extract pixel color from image
+      cv::Vec3b &c = image.at<cv::Vec3b>(row, col);
+      // row, col here are actually x and y(in image coords).
+      // so height and width are actually x and y axis and columns and rows in the sense of matrix.
+      // this is annoying simply because that image_t has the img->h (height) as x axis and img->w (width) as y axis.
+      // when it is transformed in to opencv Mat, Mat(height, width) or Mat(img->h, img->w) will correspond to the actual x and y axis
+      // in opencv. So the image/mat is not transposed and it is correct.
+      // row and col as iterator here are actually columns and rows in the matrix sense. It is called so because they corresponds to
+      // columns and rows in img (img->h axis and img->w axis).
+
+      // Set image buffer values
+      int i = row * y + col;
+      img[2 * i + 1] = c[0]; // y;
+      img[2 * i] = col % 2 ? c[2] : c[1]; // u or v
+      // note that u comes first if col%2 evaulate to 0, return the second, thus c[1] is returned.
+    }
+  }
+}
+
 void coloryuv_opencv_to_yuv422(Mat image, char *img)
 {
   CV_Assert(image.depth() == CV_8U);
@@ -66,12 +90,13 @@ void coloryuv_opencv_to_yuv422(Mat image, char *img)
   }
 }
 
-void colorrgb_opencv_to_yuv422(Mat image, char *img)
+void colorrgb_opencv_to_yuv422(Mat image, char *img, int width, int height)
 {
   // Convert to YUV color space
   cvtColor(image, image, COLOR_BGR2YUV);
   // then call the to color function
-  coloryuv_opencv_to_yuv422(image, img);
+  //coloryuv_opencv_to_yuv422(image, img);
+  yuv_opencv_to_yuv422(image, img, width, height);
 }
 
 
@@ -180,32 +205,32 @@ void flow_divigence_cal_lmr(IplImage *flowx, IplImage *flowy, float *flag)
 	//return flag;
 }
 
-void optical_flow_avoid(IplImage *frame_curr, IplImage *frame_pre,float *flag)
-{
-	/*
-	INPUT
-	frame_curr:current picture  type:IplImage
-	frame_pre :previous picture type:IplImage
-	threshold :threshold for optical flow type:int
-	OUTPUT
-	forward_to_go: 1-safe 0-dangerous
-	*/
-	//pre dealing with the Image
-	IplImage *image1_8bit = cvCreateImage(cvGetSize(frame_pre), IPL_DEPTH_8U, 1);
-	IplImage *image2_8bit = cvCreateImage(cvGetSize(frame_curr), IPL_DEPTH_8U, 1);
-	cvCvtColor(frame_pre, image1_8bit, CV_RGB2GRAY);
-	cvCvtColor(frame_curr, image2_8bit, CV_RGB2GRAY);
-	//optical flow caculation
-	IplImage* flowx = cvCreateImage(cvSize(image1_8bit->width, image1_8bit->height), IPL_DEPTH_32F, 1);
-	IplImage* flowy = cvCreateImage(cvSize(image1_8bit->width, image1_8bit->height), IPL_DEPTH_32F, 1);
-	//optical flow calculation
-	cvCalcOpticalFlowLK(image1_8bit, image2_8bit, cvSize(5, 5), flowx, flowy);
-	//LMR flag calculation
-	flow_divigence_cal_lmr(flowx, flowy, flag);
-	//printf("division l=%f m=%f r=%f\n", flag[0], flag[1], flag[2]);
-	cvReleaseImage(&image1_8bit);
-	cvReleaseImage(&image2_8bit);
-	cvReleaseImage(&flowx);
-	cvReleaseImage(&flowy);
-
-}
+//void optical_flow_avoid(IplImage *frame_curr, IplImage *frame_pre,float *flag)
+//{
+//	/*
+//	INPUT
+//	frame_curr:current picture  type:IplImage
+//	frame_pre :previous picture type:IplImage
+//	threshold :threshold for optical flow type:int
+//	OUTPUT
+//	forward_to_go: 1-safe 0-dangerous
+//	*/
+//	//pre dealing with the Image
+//	IplImage *image1_8bit = cvCreateImage(cvGetSize(frame_pre), IPL_DEPTH_8U, 1);
+//	IplImage *image2_8bit = cvCreateImage(cvGetSize(frame_curr), IPL_DEPTH_8U, 1);
+//	cvCvtColor(frame_pre, image1_8bit, CV_RGB2GRAY);
+//	cvCvtColor(frame_curr, image2_8bit, CV_RGB2GRAY);
+//	//optical flow caculation
+//	IplImage* flowx = cvCreateImage(cvSize(image1_8bit->width, image1_8bit->height), IPL_DEPTH_32F, 1);
+//	IplImage* flowy = cvCreateImage(cvSize(image1_8bit->width, image1_8bit->height), IPL_DEPTH_32F, 1);
+//	//optical flow calculation
+//	cvCalcOpticalFlowLK(image1_8bit, image2_8bit, cvSize(5, 5), flowx, flowy);
+//	//LMR flag calculation
+//	flow_divigence_cal_lmr(flowx, flowy, flag);
+//	//printf("division l=%f m=%f r=%f\n", flag[0], flag[1], flag[2]);
+//	cvReleaseImage(&image1_8bit);
+//	cvReleaseImage(&image2_8bit);
+//	cvReleaseImage(&flowx);
+//	cvReleaseImage(&flowy);
+//
+//}

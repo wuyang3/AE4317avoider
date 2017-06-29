@@ -1,0 +1,39 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="cv_opencv_aruco" dir="cv_opencv_aruco">
+  <doc>
+    <description>Test aruco code detection with aruco library</description>
+    <define name="ARUCO_CAMERA" value="front_camera|bottom_camera" description="Video device to use"/>
+  </doc>
+  <header>
+    <file name="cv_opencv_aruco.h"/>
+  </header>
+  <init fun="opencv_aruco_init()"/>
+  <makefile target="ap">
+    <file name="cv_opencv_aruco.c"/>
+    <file name="opencv_aruco.cpp"/>
+    <file name="../computer_vision/opencv_image_functions.cpp"/>
+    <file name="aruco.cpp"/>
+    <!-- 
+    <file name="charuco.cpp"/>
+    -->
+    <file name="dictionary.cpp"/>
+    
+    <flag name="CXXFLAGS" value="I$(PAPARAZZI_SRC)/sw/ext/opencv_bebop/install/include"/>
+    <flag name="LDFLAGS" value="L$(PAPARAZZI_HOME)/sw/ext/opencv_bebop/install/lib" />
+	<flag name="LDFLAGS" value="lopencv_world" />
+	<flag name="LDFLAGS" value="L$(PAPARAZZI_HOME)/sw/ext/opencv_bebop/install/share/OpenCV/3rdparty/lib" />
+	<flag name="LDFLAGS" value="ltegra_hal" />
+	<flag name="LDFLAGS" value="lzlib" />
+	<flag name="LDFLAGS" value="llibjpeg" />
+	<flag name="LDFLAGS" value="llibpng" />
+	<flag name="LDFLAGS" value="llibtiff" />
+	<flag name="LDFLAGS" value="lstdc++" />
+	<flag name="LDFLAGS" value="ldl" />
+	<flag name="LDFLAGS" value="lm" />
+	<flag name="LDFLAGS" value="lpthread" />
+	<flag name="LDFLAGS" value="lrt" />
+    
+  </makefile>
+</module>
+
